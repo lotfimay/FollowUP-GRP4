@@ -1,0 +1,31 @@
+# Environnements virtuels
+.venv/
+venv/
+env/
+.env
+
+# Fichiers Python compilés
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Fichiers de configuration IDE
+.vscode/
+.idea/
+
+# Fichiers de configuration de base de données / Secrets
+.env
+db.sqlite3
+
+# Fichiers de log
+*.log
+
+# Dossier de build et distribution (si vous en créez)
+dist/
+build/
+*.egg-info/
+
+# Dossier d'Alembic (si vous ne voulez pas versionner la base locale)
+# Note : Gardez le dossier 'versions' pour les migrations, 
+# mais ignorez les fichiers de données SQLite locaux si utilisés.
