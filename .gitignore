@@ -3,7 +3,7 @@
 venv/
 env/
 .env
-
+.coverage
 # Fichiers Python compilés
 __pycache__/
 *.pyc

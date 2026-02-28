@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum, func
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum, Boolean, func
 from sqlalchemy.orm import relationship
 import enum
 from src.database import Base
@@ -49,17 +49,21 @@ class Processeur(Base):
 
 class Incident(Base):
     __tablename__ = "incidents"
-    
+
     id = Column(Integer, primary_key=True)
     date_incident = Column(DateTime, nullable=False)
     heure_incident = Column(DateTime, nullable=False)
     gravite = Column(String(50), nullable=False)
     description = Column(String(2000), nullable=False)
     statut = Column(Enum(StatutIncident), default=StatutIncident.OUVERT)
-    
+
+    # Soft delete: l'incident n'est pas supprimé physiquement de la BDD,
+    # juste marqué comme supprimé (conformité IEC 62304 — traçabilité)
+    is_deleted = Column(Boolean, default=False, nullable=False)
+
     id_patient = Column(Integer, ForeignKey("patients.id"), nullable=False)
     id_medecin = Column(Integer, nullable=True)
-    
+
     patient = relationship("Patient", back_populates="incidents")
     suivis = relationship("SuiviIncident", back_populates="incident")
 

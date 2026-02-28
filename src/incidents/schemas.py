@@ -14,9 +14,8 @@ class IncidentCreate(BaseModel):
 class IncidentRead(IncidentCreate):
     id: int
     statut: StatutIncident
-    # date_creation supprimé car il n'existe pas dans votre modèle SQLAlchemy
     
-    class Config:
+    class ConfigDict:
         from_attributes = True
 
 class SuiviCreate(BaseModel):
@@ -28,5 +27,5 @@ class SuiviRead(SuiviCreate):
     date_suivi: datetime
     id_incident: int
     
-    class Config:
+    class ConfigDict:
         from_attributes = True

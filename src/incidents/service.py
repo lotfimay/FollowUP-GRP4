@@ -12,15 +12,29 @@ async def create_incident(db: AsyncSession, incident_data: IncidentCreate):
     return new_incident
 
 async def get_incident(db: AsyncSession, incident_id: int):
-    result = await db.execute(select(Incident).where(Incident.id == incident_id))
+    result = await db.execute(
+        select(Incident).where(
+            Incident.id == incident_id,
+            Incident.is_deleted.is_(False)  # noqa: E712
+        )
+    )
     return result.scalar_one_or_none()
 
 async def get_patient_incidents(db: AsyncSession, patient_id: int):
-    result = await db.execute(select(Incident).where(Incident.id_patient == patient_id))
+    result = await db.execute(
+        select(Incident).where(
+            Incident.id_patient == patient_id,
+            Incident.is_deleted.is_(False)  # noqa: E712
+        )
+    )
     return result.scalars().all()
 
 async def update_incident(db: AsyncSession, incident_id: int, data: dict):
-    await db.execute(update(Incident).where(Incident.id == incident_id).values(**data))
+    await db.execute(
+        update(Incident)
+        .where(Incident.id == incident_id, Incident.is_deleted.is_(False))  # noqa: E712
+        .values(**data)
+    )
     await db.commit()
     return await get_incident(db, incident_id)
 
@@ -35,3 +49,21 @@ async def add_suivi(db: AsyncSession, incident_id: int, suivi_data: SuiviCreate)
 async def get_suivis_by_incident(db: AsyncSession, incident_id: int):
     result = await db.execute(select(SuiviIncident).where(SuiviIncident.id_incident == incident_id))
     return result.scalars().all()
+
+async def delete_incident(db: AsyncSession, incident_id: int) -> bool:
+    """
+    Soft delete an incident by marking is_deleted = True.
+    The record is kept in the database for audit/traceability (IEC 62304).
+    Returns True if the incident was found and deleted, False otherwise.
+    """
+    existing = await get_incident(db, incident_id)
+    if not existing:
+        return False
+
+    await db.execute(
+        update(Incident)
+        .where(Incident.id == incident_id)
+        .values(is_deleted=True)
+    )
+    await db.commit()
+    return True

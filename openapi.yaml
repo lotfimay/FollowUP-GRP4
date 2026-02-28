@@ -1,0 +1,376 @@
+openapi: 3.1.0
+info:
+  title: FollowUp API
+  version: 0.1.0
+paths:
+  /api/incidents/:
+    post:
+      tags:
+      - Incidents
+      summary: Créer un nouvel incident
+      description: Déclare un nouvel incident lié à un patient. Le statut est automatiquement
+        défini à 'Ouvert'.
+      operationId: create_incident_api_incidents__post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IncidentCreate'
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IncidentRead'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/incidents/patient/{patient_id}:
+    get:
+      tags:
+      - Incidents
+      summary: Liste des incidents d'un patient
+      description: Retourne tous les incidents actifs (non supprimés) d'un patient
+        donné.
+      operationId: read_patient_incidents_api_incidents_patient__patient_id__get
+      parameters:
+      - name: patient_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Patient Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/IncidentRead'
+                title: Response Read Patient Incidents Api Incidents Patient  Patient
+                  Id  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/incidents/{incident_id}:
+    get:
+      tags:
+      - Incidents
+      summary: Récupérer un incident par ID
+      description: Retourne les détails d'un incident. Retourne 404 si l'incident
+        n'existe pas ou a été supprimé.
+      operationId: read_incident_api_incidents__incident_id__get
+      parameters:
+      - name: incident_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Incident Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IncidentRead'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    put:
+      tags:
+      - Incidents
+      summary: Mettre à jour un incident
+      description: Met à jour les champs d'un incident existant. Retourne 404 si l'incident
+        est introuvable.
+      operationId: update_incident_api_incidents__incident_id__put
+      parameters:
+      - name: incident_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Incident Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+              title: Data
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IncidentRead'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - Incidents
+      summary: Supprimer un incident (soft delete)
+      description: Marque l'incident comme supprimé (is_deleted=True) sans l'effacer
+        physiquement de la base. Cela garantit la traçabilité conformément à la norme
+        IEC 62304.
+      operationId: delete_incident_api_incidents__incident_id__delete
+      parameters:
+      - name: incident_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Incident Id
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/incidents/{incident_id}/suivis:
+    post:
+      tags:
+      - Incidents
+      summary: Ajouter un suivi à un incident
+      description: Enregistre une action médicale prise sur un incident existant.
+      operationId: add_suivi_to_incident_api_incidents__incident_id__suivis_post
+      parameters:
+      - name: incident_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Incident Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SuiviCreate'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuiviRead'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+      - Incidents
+      summary: Historique des suivis d'un incident
+      description: Retourne la liste chronologique de tous les suivis enregistrés
+        pour un incident.
+      operationId: get_suivis_incident_api_incidents__incident_id__suivis_get
+      parameters:
+      - name: incident_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Incident Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SuiviRead'
+                title: Response Get Suivis Incident Api Incidents  Incident Id  Suivis
+                  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+components:
+  schemas:
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    IncidentCreate:
+      properties:
+        date_incident:
+          type: string
+          format: date-time
+          title: Date Incident
+        heure_incident:
+          type: string
+          format: date-time
+          title: Heure Incident
+        gravite:
+          type: string
+          pattern: ^(Mineur|Modéré|Majeur|Critique)$
+          title: Gravite
+        description:
+          type: string
+          maxLength: 2000
+          title: Description
+        id_patient:
+          type: integer
+          title: Id Patient
+        id_medecin:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Id Medecin
+      type: object
+      required:
+      - date_incident
+      - heure_incident
+      - gravite
+      - description
+      - id_patient
+      title: IncidentCreate
+    IncidentRead:
+      properties:
+        date_incident:
+          type: string
+          format: date-time
+          title: Date Incident
+        heure_incident:
+          type: string
+          format: date-time
+          title: Heure Incident
+        gravite:
+          type: string
+          pattern: ^(Mineur|Modéré|Majeur|Critique)$
+          title: Gravite
+        description:
+          type: string
+          maxLength: 2000
+          title: Description
+        id_patient:
+          type: integer
+          title: Id Patient
+        id_medecin:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Id Medecin
+        id:
+          type: integer
+          title: Id
+        statut:
+          $ref: '#/components/schemas/StatutIncident'
+      type: object
+      required:
+      - date_incident
+      - heure_incident
+      - gravite
+      - description
+      - id_patient
+      - id
+      - statut
+      title: IncidentRead
+    StatutIncident:
+      type: string
+      enum:
+      - Ouvert
+      - EnCours
+      - Resolu
+      - Ferme
+      title: StatutIncident
+    SuiviCreate:
+      properties:
+        actions_prises:
+          type: string
+          maxLength: 2000
+          title: Actions Prises
+        id_medecin:
+          type: integer
+          title: Id Medecin
+      type: object
+      required:
+      - actions_prises
+      - id_medecin
+      title: SuiviCreate
+    SuiviRead:
+      properties:
+        actions_prises:
+          type: string
+          maxLength: 2000
+          title: Actions Prises
+        id_medecin:
+          type: integer
+          title: Id Medecin
+        id:
+          type: integer
+          title: Id
+        date_suivi:
+          type: string
+          format: date-time
+          title: Date Suivi
+        id_incident:
+          type: integer
+          title: Id Incident
+      type: object
+      required:
+      - actions_prises
+      - id_medecin
+      - id
+      - date_suivi
+      - id_incident
+      title: SuiviRead
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
